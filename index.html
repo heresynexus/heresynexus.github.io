@@ -150,6 +150,22 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
 #vox .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#c97a5a;text-transform:uppercase;padding:0 4px}
 #vox.empty{display:none}
 body.gated #vox{z-index:60}
+#foot{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:6;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--dim);text-align:center;white-space:nowrap}
+#foot a,#foot button{color:#b39a70;text-decoration:none;border-bottom:1px dotted #6b5233;background:none;border-top:0;border-left:0;border-right:0;font:inherit;cursor:pointer;padding:0}
+#foot a:hover,#foot button:hover{color:var(--gold2)}
+#foot .flag{color:#e0806a}
+.gdisc{font-family:var(--mono);font-size:10.5px;color:#7d715f;margin-top:10px;letter-spacing:.05em;line-height:1.6}
+.gdisc a{color:#b39a70}
+.report{margin-top:14px;padding:10px 12px;border:1px dashed #5b2a1c;background:rgba(120,30,20,.12);font-size:13.5px;color:#d8ccb2}
+.report a{color:#ffb8a8;font-family:var(--cap);font-size:12px;letter-spacing:.06em}
+#rep{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(0,0,0,.72)}
+#rep.on{display:grid}
+#rep .box{width:min(460px,92vw);background:linear-gradient(180deg,#221a15,#140f0c);border:1px solid #7a5c35;box-shadow:0 0 0 5px #1b130f,0 0 0 6px #5b4630,0 20px 60px #000;padding:20px 22px;position:relative}
+#rep h2{font-family:var(--cap);color:var(--gold);font-size:18px;letter-spacing:.08em;margin:0 0 10px}
+#rep p{margin:8px 0;font-size:15px;line-height:1.5;color:#e6dac0}
+#rep .x{position:absolute;top:8px;right:10px;background:none;border:0;color:var(--ash);font-size:22px;cursor:pointer}
+#rep .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+#rep .acts a{text-decoration:none}
 #gHint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c97a5a;margin-top:12px;opacity:0;transition:opacity .4s}
 #gHint.on{opacity:1;animation:pulse 2.4s infinite ease-in-out}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
@@ -161,7 +177,7 @@ body.gated #vox{z-index:60}
 #vox input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:16px;background:linear-gradient(180deg,#f0d48a,#8a5d1c);border:1px solid #000;border-radius:1px;box-shadow:0 1px 3px #000}
 #vox input[type=range]::-moz-range-thumb{width:12px;height:16px;background:linear-gradient(180deg,#f0d48a,#8a5d1c);border:1px solid #000;border-radius:1px}
 @keyframes eq{0%,100%{height:3px}50%{height:14px}}
-@media (max-width:760px){ #vox input[type=range]{width:64px} #vox{bottom:8px;right:8px;left:8px;justify-content:center} #vox select{max-width:150px} #vox .lbl{display:none} }
+@media (max-width:760px){ #vox input[type=range]{width:90px} #foot{display:none} #vox{flex-wrap:wrap;bottom:8px;right:8px;left:8px;justify-content:center} #vox select{max-width:150px} #vox .lbl{display:none} }
 @media (max-width:760px){
   h1{font-size:20px} .sub{display:none}
   .controls{top:44px;left:10px;right:10px;max-width:none;justify-content:flex-start}
@@ -202,6 +218,15 @@ body.gated #vox{z-index:60}
   <label><input type="checkbox" id="tRos" checked>Full roster</label>
 </details>
 <div class="hint">Click the void to clear</div>
+<div id="foot">Unofficial fan project · Not affiliated with or endorsed by Games Workshop · Character data: <a href="https://wh40k.lexicanum.com" target="_blank" rel="noopener">Lexicanum</a> · <button type="button" class="flag" id="footRep">⚑ Found a mistake?</button></div>
+<div id="rep" role="dialog" aria-modal="true" aria-labelledby="repT"><div class="box">
+  <button class="x" type="button" aria-label="Close" id="repX">×</button>
+  <h2 id="repT">⚑ Found a mistake?</h2>
+  <p>With 1,800+ names drawn from dozens of books, errors will slip through. Corrections are very welcome: a wrong Legion, a missing connection, a spoiler that escaped the seals, or a character who isn't here.</p>
+  <p>The button below opens a short form on GitHub (a free account is needed). Tell us what's wrong and, if you can, the book it comes from.</p>
+  <p style="font-size:13.5px;color:var(--ash)">To report a specific character, open their record and use <i>Report a mistake in this record</i> at the bottom.</p>
+  <div class="acts"><a class="plate" id="repGo" href="#" target="_blank" rel="noopener">Report a mistake ↗</a><button class="plate" type="button" id="repClose">Close</button></div>
+</div></div>
 <div id="vox" class="plate empty" role="region" aria-label="Music">
   <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl">Vox</span>
   <button id="mPrev" type="button" title="Previous track" aria-label="Previous track">⏮</button>
@@ -223,6 +248,7 @@ body.gated #vox{z-index:60}
       <button class="plate" type="button" id="gFull">Enter · Unseal all records</button>
     </div>
     <div class="gnote">You can change this at any time with the Spoilers switch.</div>
+    <div class="gdisc">Unofficial fan project, not affiliated with or endorsed by Games Workshop. Warhammer and The Horus Heresy are trademarks of Games Workshop Ltd.<br>Character data drawn from <a href="https://wh40k.lexicanum.com" target="_blank" rel="noopener">Lexicanum</a>. Original music by the site's creator.</div>
     <div id="gHint">♪ Touch anywhere to awaken the vox ♪</div>
   </div>
 </div>
@@ -798,6 +824,7 @@ function select(id,center){
   ${facts?`<div class="dsec"><h3>Particulars</h3>${facts}</div>`:""}
   ${(lexLine(n,false))?`<div class="dsec"><h3>Archive notes</h3>${lexLine(n,false)}</div>`:""}
   ${conns}
+  <div class="report">⚑ Something wrong or missing here? <a href="${reportURL(n)}" target="_blank" rel="noopener">Report a mistake in this record ↗</a></div>
   ${slug?`<a class="lexlink" href="https://wh40k.lexicanum.com/wiki/${encodeURI(slug)}" target="_blank" rel="noopener">Read the full entry on Lexicanum ↗</a>${SPOIL?"":`<div class="more">Warning: external entries are not spoiler-free.</div>`}`:""}
   </div>`;
   panel.classList.add("on");
@@ -848,6 +875,16 @@ document.getElementById("tRel").onchange=e=>svg.classList.toggle("norel",!e.targ
 
 const NCHAR=nodes.filter(n=>!n.hub).length;
 document.getElementById("sub").innerHTML=`+++ Archive of the Sigillite · <b>${NCHAR.toLocaleString()}</b> named souls · hover to read · click to trace · scroll to zoom +++`;
+// ---------- corrections ----------
+const REPO_ISSUES="https://github.com/heresynexus/heresynexus.github.io/issues/new";
+function reportURL(n){
+  const t=n?`Correction: ${n.name}`:"Correction";
+  const b=n?`**Character:** ${n.name}\n**Faction:** ${gById[n.g].name}\n**Record:** ${recNo(n)}\n\n**What's wrong:**\n\n\n**What it should say:**\n\n\n**Source (book / chapter, if you know it):**\n`
+           :`**What's wrong:**\n\n\n**What it should say:**\n\n\n**Source (book / chapter, if you know it):**\n`;
+  return `${REPO_ISSUES}?title=${encodeURIComponent(t)}&body=${encodeURIComponent(b)}`;
+}
+(function(){ const m=document.getElementById("rep"); const open=()=>{ document.getElementById("repGo").href=reportURL(null); m.classList.add("on"); }; const close=()=>m.classList.remove("on");
+  document.getElementById("footRep").onclick=open; document.getElementById("repX").onclick=close; document.getElementById("repClose").onclick=close; m.addEventListener("click",e=>{ if(e.target===m) close(); }); addEventListener("keydown",e=>{ if(e.key==="Escape") close(); }); })();
 // ---------- gate ----------
 (function(){
   const THOUGHTS=["Every name in this archive was paid for in blood.","Brother turned upon brother. Remember them all.","The galaxy burned; the record endures.","Loyalty is proven in the dark, not the light.","Even the smallest name may hold the hinge of history.","Knowledge is a weapon. This archive is an armoury.","Not every oath survives the warp.","The Crusade is ended. The reckoning has begun."];
