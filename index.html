@@ -149,6 +149,10 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
 #vox select{background:#120d0a;color:var(--bone);border:1px solid #5b4630;font-family:var(--serif);font-size:14px;padding:4px 6px;max-width:220px;border-radius:2px}
 #vox .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#c97a5a;text-transform:uppercase;padding:0 4px}
 #vox.empty{display:none}
+body.gated #vox{z-index:60}
+#gHint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c97a5a;margin-top:12px;opacity:0;transition:opacity .4s}
+#gHint.on{opacity:1;animation:pulse 2.4s infinite ease-in-out}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
 #vox .eq{display:inline-flex;gap:2px;align-items:flex-end;height:14px;width:14px}
 #vox .eq i{display:block;width:3px;background:var(--gold);height:4px}
 #vox.playing .eq i{animation:eq 0.9s infinite ease-in-out}
@@ -167,7 +171,7 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
 }
 </style>
 </head>
-<body>
+<body class="gated">
 <canvas id="embers"></canvas>
 <header>
   <h1>The Heresy Nexus</h1>
@@ -219,6 +223,7 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
       <button class="plate" type="button" id="gFull">Enter · Unseal all records</button>
     </div>
     <div class="gnote">You can change this at any time with the Spoilers switch.</div>
+    <div id="gHint">♪ Touch anywhere to awaken the vox ♪</div>
   </div>
 </div>
 
@@ -850,7 +855,7 @@ document.getElementById("sub").innerHTML=`+++ Archive of the Sigillite · <b>${N
   const lines=["> Cogitator awakening………… <span class=ok>OK</span>","> Machine spirit appeased……… <span class=ok>OK</span>",`> Recovering archive of Terra… <span class=ok>${NCHAR.toLocaleString()} records</span>`,`> Tracing bonds and blood-debts… <span class=ok>${edges.filter(e=>e.rel).length} threads</span>`,"> Applying seals of the Sigillite… <span class=ok>READY</span>"];
   const boot=document.getElementById("boot"); let i=0;
   (function next(){ if(i<lines.length){ boot.innerHTML+=lines[i++]+"\n"; setTimeout(next,260); } })();
-  const go=v=>{ SPOIL=v; try{localStorage.setItem("hh_spoilers",SPOIL?"on":"off");}catch(e){} applySpoilers(); document.getElementById("gate").classList.add("gone"); MUSIC.begin(); };
+  const go=v=>{ SPOIL=v; try{localStorage.setItem("hh_spoilers",SPOIL?"on":"off");}catch(e){} applySpoilers(); document.getElementById("gate").classList.add("gone"); document.body.classList.remove("gated"); MUSIC.begin(); };
   document.getElementById("gSafe").onclick=()=>go(false);
   document.getElementById("gFull").onclick=()=>go(true);
 })();
@@ -904,7 +909,16 @@ const MUSIC=(function(){
   vol.addEventListener("input",()=>{ setVol(+vol.value); if(au.muted&&+vol.value>0) au.muted=false; try{localStorage.setItem("hn_vol",vol.value);}catch(e){} });
   try{ au.muted=localStorage.getItem("hn_muted")==="1"; }catch(e){}
   const ready=discover().then(L=>{ tracks=L; if(!L.length) return; sel.innerHTML=L.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join(""); box.classList.remove("empty"); let s=0; try{ s=+localStorage.getItem("hn_track")||0; }catch(e){} if(s>=L.length) s=0; load(s,false); ui(); });
-  return { begin(){ ready.then(()=>{ if(tracks.length&&!au.muted) start(); }); } };
+  const hint=()=>document.getElementById("gHint");
+  function tryStart(){ if(!tracks.length||au.muted||!au.paused) return Promise.resolve(); wanted=true; const p=au.play(); return (p&&p.then)?p:Promise.resolve(); }
+  function arm(){
+    const go=()=>{ tryStart().then(()=>{ if(!au.paused){ off(); if(hint()) hint().classList.remove("on"); } }).catch(()=>{}); };
+    const evs=["pointerdown","keydown","touchstart"]; const off=()=>evs.forEach(e=>document.removeEventListener(e,go,true));
+    evs.forEach(e=>document.addEventListener(e,go,true));
+  }
+  // opening scene: try to start straight away; if the browser blocks sound, start on the first touch/click/key
+  ready.then(()=>{ if(!tracks.length||au.muted) return; tryStart().then(()=>{ if(au.paused) throw 0; }).catch(()=>{ if(hint()) hint().classList.add("on"); arm(); }); });
+  return { begin(){ ready.then(()=>{ if(tracks.length&&!au.muted&&au.paused) start(); }); } };
 })();
 // ---------- embers ----------
 (function(){
