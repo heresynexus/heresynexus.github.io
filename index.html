@@ -153,8 +153,11 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
 #vox .eq i{display:block;width:3px;background:var(--gold);height:4px}
 #vox.playing .eq i{animation:eq 0.9s infinite ease-in-out}
 #vox.playing .eq i:nth-child(2){animation-delay:.2s}#vox.playing .eq i:nth-child(3){animation-delay:.4s}
+#vox input[type=range]{-webkit-appearance:none;appearance:none;width:90px;height:4px;background:linear-gradient(90deg,var(--gold) var(--v,30%),#3a2c21 var(--v,30%));border:1px solid #5b4630;border-radius:2px;cursor:pointer;margin:0 4px}
+#vox input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:16px;background:linear-gradient(180deg,#f0d48a,#8a5d1c);border:1px solid #000;border-radius:1px;box-shadow:0 1px 3px #000}
+#vox input[type=range]::-moz-range-thumb{width:12px;height:16px;background:linear-gradient(180deg,#f0d48a,#8a5d1c);border:1px solid #000;border-radius:1px}
 @keyframes eq{0%,100%{height:3px}50%{height:14px}}
-@media (max-width:760px){ #vox{bottom:8px;right:8px;left:8px;justify-content:center} #vox select{max-width:150px} #vox .lbl{display:none} }
+@media (max-width:760px){ #vox input[type=range]{width:64px} #vox{bottom:8px;right:8px;left:8px;justify-content:center} #vox select{max-width:150px} #vox .lbl{display:none} }
 @media (max-width:760px){
   h1{font-size:20px} .sub{display:none}
   .controls{top:44px;left:10px;right:10px;max-width:none;justify-content:flex-start}
@@ -202,6 +205,7 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
   <button id="mNext" type="button" title="Next track" aria-label="Next track">⏭</button>
   <select id="mSel" aria-label="Choose a song"></select>
   <button id="mMute" type="button" title="Mute" aria-label="Mute">🔊</button>
+  <input id="mVol" type="range" min="0" max="100" step="1" value="30" title="Volume" aria-label="Volume">
 </div>
 <audio id="mAudio" preload="none"></audio>
 <div id="gate">
@@ -893,7 +897,12 @@ const MUSIC=(function(){
   document.getElementById("mNext").onclick=()=>load(idx+1,true);
   sel.onchange=()=>load(+sel.value,true);
   bMute.onclick=()=>{ au.muted=!au.muted; try{localStorage.setItem("hn_muted",au.muted?"1":"0");}catch(e){} };
-  au.volume=.55; try{ au.muted=localStorage.getItem("hn_muted")==="1"; }catch(e){}
+  const vol=document.getElementById("mVol");
+  const setVol=v=>{ v=Math.max(0,Math.min(100,v)); au.volume=(v/100)*(v/100); vol.value=v; vol.style.setProperty("--v",v+"%"); vol.title="Volume "+v+"%"; };
+  let v0=30; try{ const sv=localStorage.getItem("hn_vol"); if(sv!==null) v0=+sv; }catch(e){}
+  setVol(v0);
+  vol.addEventListener("input",()=>{ setVol(+vol.value); if(au.muted&&+vol.value>0) au.muted=false; try{localStorage.setItem("hn_vol",vol.value);}catch(e){} });
+  try{ au.muted=localStorage.getItem("hn_muted")==="1"; }catch(e){}
   const ready=discover().then(L=>{ tracks=L; if(!L.length) return; sel.innerHTML=L.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join(""); box.classList.remove("empty"); let s=0; try{ s=+localStorage.getItem("hn_track")||0; }catch(e){} if(s>=L.length) s=0; load(s,false); ui(); });
   return { begin(){ ready.then(()=>{ if(tracks.length&&!au.muted) start(); }); } };
 })();
