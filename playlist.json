@@ -1,7 +1,1 @@
-{
-  "tracks": [
-    { "src": "Before the War.mp3", "name": "Before the War" },
-    { "src": "Each Lost Name.mp3", "name": "Each Lost Name" },
-    { "src": "Father's Cry.mp3",   "name": "Father's Cry" }
-  ]
-}
+{"tracks":[{"src":"Before the War.mp3","name":"Before the War"},{"src":"Father's Cry.mp3","name":"Father's Cry"},{"src":"The Ostinato of War.mp3","name":"The Ostinato of War"},{"src":"The Bastard War.mp3","name":"The Bastard War"}]}
