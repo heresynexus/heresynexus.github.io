@@ -39,7 +39,9 @@ h1{font-family:var(--deco);font-weight:900;font-size:28px;letter-spacing:.08em;m
 .plate:hover,.plate:focus{border-color:var(--gold);outline:none}
 input.plate{width:230px;font-family:var(--serif);font-size:15px}
 input.plate::placeholder{color:#8a7c66;font-style:italic}
-select.plate{cursor:pointer}
+select.plate{cursor:pointer;color-scheme:dark;background:linear-gradient(180deg,#2d231c,#17110d)}
+select.plate option{background:#1a130f;color:#eadfc6}
+select.plate option:checked{background:#5b2a1c;color:#f3e6c8}
 button.plate{cursor:pointer}
 #spoil{display:flex;align-items:center;gap:8px}
 #spoil .seal{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e05a4a,#7a120c 70%);box-shadow:0 0 0 2px #3a0b07,0 0 8px rgba(200,40,30,.6)}
@@ -148,7 +150,8 @@ svg.noros .node.ros,svg.noros .lab.ros,svg.noros .rel.auto{display:none}
 #vox{position:fixed;right:18px;bottom:62px;z-index:9;display:flex;align-items:center;gap:6px;padding:6px 8px;max-width:calc(100% - 36px)}
 #vox button{background:none;border:1px solid #5b4630;color:var(--bone);font-family:var(--cap);font-size:13px;width:32px;height:30px;cursor:pointer;border-radius:2px;line-height:1}
 #vox button:hover{border-color:var(--gold);color:var(--gold2)}
-#vox select{background:#120d0a;color:var(--bone);border:1px solid #5b4630;font-family:var(--serif);font-size:14px;padding:4px 6px;max-width:220px;border-radius:2px}
+#vox select option{background:#1a130f;color:#eadfc6}
+#vox select{color-scheme:dark;background:#120d0a;color:var(--bone);border:1px solid #5b4630;font-family:var(--serif);font-size:14px;padding:4px 6px;max-width:220px;border-radius:2px}
 #vox .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#c97a5a;text-transform:uppercase;padding:0 4px}
 #vox.empty{display:none}
 body.gated #vox{z-index:60}
@@ -879,9 +882,13 @@ if(innerHeight<1000) document.querySelector('.legend').removeAttribute('open');
 
 // ---------- search & filters ----------
 const dl=document.getElementById("names");
-nodes.filter(n=>!n.hub).sort((a,b)=>a.name.localeCompare(b.name)).forEach(n=>{const o=document.createElement("option");o.value=n.name;dl.appendChild(o);});
+// accent- and punctuation-insensitive matching: "Narik" finds "Nârik", "Kharn" finds "Khârn", "El Jonson" finds "El'Jonson"
+const fold=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[æ]/gi,"ae").replace(/[ø]/gi,"o").replace(/[’‘'`´"“”]/g,"").replace(/[-–—_.·,]/g," ").replace(/\s+/g," ").trim().toLowerCase();
+nodes.forEach(n=>{n.fname=fold(n.name); n.fz=n.fname.replace(/ /g,"");});
+const plain=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+nodes.filter(n=>!n.hub).sort((a,b)=>a.name.localeCompare(b.name)).forEach(n=>{const o=document.createElement("option");o.value=n.name;dl.appendChild(o); const pl=plain(n.name); if(pl!==n.name){const o2=document.createElement("option");o2.value=pl;dl.appendChild(o2);} });
 const q=document.getElementById("q");
-function find(){ const v=q.value.trim().toLowerCase(); if(!v)return; const n=nodes.find(n=>n.name.toLowerCase()===v)||nodes.find(n=>n.name.toLowerCase().includes(v)); if(n){select(n.id,true);} }
+function find(){ const v=fold(q.value); if(!v)return; const pool=nodes.filter(n=>SPOIL||!n.spoilNode); const n=pool.find(n=>n.fname===v)||pool.find(n=>!n.hub&&n.fname.startsWith(v))||pool.find(n=>!n.hub&&n.fname.includes(v))||pool.find(n=>n.fname.includes(v))||pool.find(n=>!n.hub&&n.fz.includes(v.replace(/ /g,""))); if(n){select(n.id,true);} }
 q.addEventListener("change",find); q.addEventListener("keydown",e=>{if(e.key==="Enter")find();});
 document.getElementById("reset").onclick=()=>{clear();fit();q.value="";};
 const side=document.getElementById("side");
